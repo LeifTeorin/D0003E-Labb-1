@@ -14,16 +14,16 @@
 
 int characters[13] =
 {
-	0x1551,		// 0 = 1551, A = 0F51
+	0x1551,		// 0
 	0x0110,		// 1
 	0x1e11,		// 2
-	0x1B11,		// 3
-	0x0B50,		// 4
-	0x1B41,		// 5
-	0x1F41,		// 6
+	0x1b11,		// 3
+	0x0b50,		// 4
+	0x1b41,		// 5
+	0x1f41,		// 6
 	0x0111,		// 7
-	0x1F51,		// 8
-	0x1B51,		// 9
+	0x1f51,		// 8
+	0x1b51,		// 9
 	0x0f50,		// H
 	0x1641,		// E
 	0x1510		// J
@@ -31,8 +31,8 @@ int characters[13] =
 
 int main(void)
 {
-	CLKPR = 0x80;	//(1<<CLKPCE);
-	CLKPR =	0x00;	//(0<<CLKPS3);
+	CLKPR = 0x80;	
+	CLKPR =	0x00;	
 	
 	// Device Initialization values:
 	
@@ -40,10 +40,10 @@ int main(void)
 	
 	PORTB = (1 << PORTB7);			//Button Setting.
     /* Replace with your application code */
-	
+	int thing = (19%10);
     while (1) 
     {
-		writeChar(4, 0);
+		writeChar(thing, 0);
 		writeChar(2, 1);
 		writeChar(0, 2);
     }
@@ -79,10 +79,15 @@ void writeChar(char ch, int pos){
 	for(int i = 0; i < 4; i++){
 		currbyte = (character & 0x0f);
 		currbyte = currbyte << shift;
-		character = (character>>4);
 		*ptr = ((*ptr & mask_reg)|currbyte);
+		character = (character>>4);
 		ptr += 5;
 	}
+	
+	
+}
+
+void writeLong(long i){
 	
 	
 }
