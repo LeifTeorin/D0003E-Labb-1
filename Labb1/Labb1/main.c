@@ -21,7 +21,7 @@ int characters[13] =
 	0x0b50,		// 4
 	0x1b41,		// 5
 	0x1f41,		// 6
-	0x0111,		// 7
+	0x4009,		// 7
 	0x1f51,		// 8
 	0x1b51,		// 9
 	0x0f50,		// H
@@ -31,17 +31,19 @@ int characters[13] =
 
 int main(void)
 {
-	CLKPR = 0x80;	
-	CLKPR =	0x00;	
+	//CLKPR = 0x80;	
+	//CLKPR =	0x00;	
 	
 	// Device Initialization values:
 	
-	LCD_init();
+	//LCD_init();
 	
-	PORTB = (1 << PORTB7);			//Button Setting.
     /* Replace with your application code */
-	int thing = (19%10);
-	writeLong(123456789);
+	
+	//blink();
+	//writeChar(7, 0);
+	//writeLong(700000);
+	
     while (1) 
     {
 		
@@ -108,6 +110,32 @@ int is_prime(long i){
 		if(i%x == 0){
 			return 0;
 		}
+		x+=1;
 	}
 	return 1;
+}
+
+void blink(void){
+	TCCR1B = TCCR1B|0x04; // detta ändrar CS12 till 1, vilket ändrar prescaling till 256
+	int light = 0;
+	unsigned int time = 31250;
+	TCNT1 = 0x0000;
+	
+	while(1){
+		
+		if(TCNT1 == time){
+			if(light){
+				LCDDR0 = LCDDR0 & 0x99;
+			}else{
+				LCDDR0 = LCDDR0 | 0x66;
+			}
+			light = ~light;
+			time += 31250;
+		}
+		if(TCNT1 > 62500){
+			time = 31250;
+		}
+		
+	}
+	
 }
