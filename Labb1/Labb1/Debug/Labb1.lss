@@ -3,29 +3,29 @@ Labb1.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         0000001a  00800100  0000014a  000001be  2**0
+  0 .data         0000001a  00800100  00000212  00000286  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000014a  00000000  00000000  00000074  2**1
+  1 .text         00000212  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000001d8  2**0
+  2 .comment      00000030  00000000  00000000  000002a0  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000208  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000002d0  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000038  00000000  00000000  00000248  2**0
+  4 .debug_aranges 00000040  00000000  00000000  00000310  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000a01  00000000  00000000  00000280  2**0
+  5 .debug_info   00000a17  00000000  00000000  00000350  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000008b4  00000000  00000000  00000c81  2**0
+  6 .debug_abbrev 000008df  00000000  00000000  00000d67  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000002b9  00000000  00000000  00001535  2**0
+  7 .debug_line   00000312  00000000  00000000  00001646  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000054  00000000  00000000  000017f0  2**2
+  8 .debug_frame  00000084  00000000  00000000  00001958  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000445  00000000  00000000  00001844  2**0
+  9 .debug_str    00000453  00000000  00000000  000019dc  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000000da  00000000  00000000  00001c89  2**0
+ 10 .debug_loc    0000020b  00000000  00000000  00001e2f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000028  00000000  00000000  00001d63  2**0
+ 11 .debug_ranges 00000030  00000000  00000000  0000203a  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -67,22 +67,22 @@ Disassembly of section .text:
   68:	11 e0       	ldi	r17, 0x01	; 1
   6a:	a0 e0       	ldi	r26, 0x00	; 0
   6c:	b1 e0       	ldi	r27, 0x01	; 1
-  6e:	ea e4       	ldi	r30, 0x4A	; 74
-  70:	f1 e0       	ldi	r31, 0x01	; 1
+  6e:	e2 e1       	ldi	r30, 0x12	; 18
+  70:	f2 e0       	ldi	r31, 0x02	; 2
   72:	02 c0       	rjmp	.+4      	; 0x78 <__do_copy_data+0x10>
   74:	05 90       	lpm	r0, Z+
   76:	0d 92       	st	X+, r0
   78:	aa 31       	cpi	r26, 0x1A	; 26
   7a:	b1 07       	cpc	r27, r17
   7c:	d9 f7       	brne	.-10     	; 0x74 <__do_copy_data+0xc>
-  7e:	0e 94 88 00 	call	0x110	; 0x110 <main>
-  82:	0c 94 a3 00 	jmp	0x146	; 0x146 <_exit>
+  7e:	0e 94 b2 00 	call	0x164	; 0x164 <main>
+  82:	0c 94 07 01 	jmp	0x20e	; 0x20e <_exit>
 
 00000086 <__bad_interrupt>:
   86:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 0000008a <LCD_init>:
-		writeChar(0, 2);
+		
     }
 }
 
@@ -191,53 +191,192 @@ void writeChar(char ch, int pos){
  10c:	2c f3       	brlt	.-54     	; 0xd8 <writeChar+0x34>
  10e:	08 95       	ret
 
-00000110 <main>:
+00000110 <writeLong>:
+	}
+	
+	
+}
+
+void writeLong(long i){
+ 110:	ef 92       	push	r14
+ 112:	ff 92       	push	r15
+ 114:	0f 93       	push	r16
+ 116:	1f 93       	push	r17
+ 118:	cf 93       	push	r28
+ 11a:	df 93       	push	r29
+	long y = i;
+	int ch;
+	int cntr = 5;
+ 11c:	c5 e0       	ldi	r28, 0x05	; 5
+ 11e:	d0 e0       	ldi	r29, 0x00	; 0
+	while(y>0){
+ 120:	15 c0       	rjmp	.+42     	; 0x14c <writeLong+0x3c>
+		if(cntr<0){
+ 122:	dd 23       	and	r29, r29
+ 124:	c4 f0       	brlt	.+48     	; 0x156 <writeLong+0x46>
+			return;
+		}
+		ch = y%10;
+ 126:	2a e0       	ldi	r18, 0x0A	; 10
+ 128:	30 e0       	ldi	r19, 0x00	; 0
+ 12a:	40 e0       	ldi	r20, 0x00	; 0
+ 12c:	50 e0       	ldi	r21, 0x00	; 0
+ 12e:	0e 94 c6 00 	call	0x18c	; 0x18c <__divmodsi4>
+ 132:	e2 2e       	mov	r14, r18
+ 134:	f3 2e       	mov	r15, r19
+ 136:	04 2f       	mov	r16, r20
+ 138:	15 2f       	mov	r17, r21
+ 13a:	86 2f       	mov	r24, r22
+		writeChar(ch, cntr);
+ 13c:	be 01       	movw	r22, r28
+ 13e:	0e 94 52 00 	call	0xa4	; 0xa4 <writeChar>
+		y = y/10;
+ 142:	6e 2d       	mov	r22, r14
+ 144:	7f 2d       	mov	r23, r15
+ 146:	80 2f       	mov	r24, r16
+ 148:	91 2f       	mov	r25, r17
+		cntr--;
+ 14a:	21 97       	sbiw	r28, 0x01	; 1
+
+void writeLong(long i){
+	long y = i;
+	int ch;
+	int cntr = 5;
+	while(y>0){
+ 14c:	16 16       	cp	r1, r22
+ 14e:	17 06       	cpc	r1, r23
+ 150:	18 06       	cpc	r1, r24
+ 152:	19 06       	cpc	r1, r25
+ 154:	34 f3       	brlt	.-52     	; 0x122 <writeLong+0x12>
+		writeChar(ch, cntr);
+		y = y/10;
+		cntr--;
+	}
+	
+}
+ 156:	df 91       	pop	r29
+ 158:	cf 91       	pop	r28
+ 15a:	1f 91       	pop	r17
+ 15c:	0f 91       	pop	r16
+ 15e:	ff 90       	pop	r15
+ 160:	ef 90       	pop	r14
+ 162:	08 95       	ret
+
+00000164 <main>:
 	0x1510		// J
 };
 
 int main(void)
 {
 	CLKPR = 0x80;	
- 110:	e1 e6       	ldi	r30, 0x61	; 97
- 112:	f0 e0       	ldi	r31, 0x00	; 0
- 114:	c0 e8       	ldi	r28, 0x80	; 128
- 116:	c0 83       	st	Z, r28
+ 164:	e1 e6       	ldi	r30, 0x61	; 97
+ 166:	f0 e0       	ldi	r31, 0x00	; 0
+ 168:	c0 e8       	ldi	r28, 0x80	; 128
+ 16a:	c0 83       	st	Z, r28
 	CLKPR =	0x00;	
- 118:	10 82       	st	Z, r1
+ 16c:	10 82       	st	Z, r1
 	
 	// Device Initialization values:
 	
 	LCD_init();
- 11a:	0e 94 45 00 	call	0x8a	; 0x8a <LCD_init>
+ 16e:	0e 94 45 00 	call	0x8a	; 0x8a <LCD_init>
 	
 	PORTB = (1 << PORTB7);			//Button Setting.
- 11e:	c5 b9       	out	0x05, r28	; 5
+ 172:	c5 b9       	out	0x05, r28	; 5
     /* Replace with your application code */
 	int thing = (19%10);
-    while (1) 
-    {
-		writeChar(thing, 0);
- 120:	60 e0       	ldi	r22, 0x00	; 0
- 122:	70 e0       	ldi	r23, 0x00	; 0
- 124:	89 e0       	ldi	r24, 0x09	; 9
- 126:	90 e0       	ldi	r25, 0x00	; 0
- 128:	0e 94 52 00 	call	0xa4	; 0xa4 <writeChar>
-		writeChar(2, 1);
- 12c:	61 e0       	ldi	r22, 0x01	; 1
- 12e:	70 e0       	ldi	r23, 0x00	; 0
- 130:	82 e0       	ldi	r24, 0x02	; 2
- 132:	90 e0       	ldi	r25, 0x00	; 0
- 134:	0e 94 52 00 	call	0xa4	; 0xa4 <writeChar>
-		writeChar(0, 2);
- 138:	62 e0       	ldi	r22, 0x02	; 2
- 13a:	70 e0       	ldi	r23, 0x00	; 0
- 13c:	80 e0       	ldi	r24, 0x00	; 0
- 13e:	90 e0       	ldi	r25, 0x00	; 0
- 140:	0e 94 52 00 	call	0xa4	; 0xa4 <writeChar>
- 144:	ed cf       	rjmp	.-38     	; 0x120 <main+0x10>
+	writeLong(123456789);
+ 174:	65 e1       	ldi	r22, 0x15	; 21
+ 176:	7d ec       	ldi	r23, 0xCD	; 205
+ 178:	8b e5       	ldi	r24, 0x5B	; 91
+ 17a:	97 e0       	ldi	r25, 0x07	; 7
+ 17c:	0e 94 88 00 	call	0x110	; 0x110 <writeLong>
+	LCDDR0 = LCDDR0|0x66;
+ 180:	ec ee       	ldi	r30, 0xEC	; 236
+ 182:	f0 e0       	ldi	r31, 0x00	; 0
+ 184:	80 81       	ld	r24, Z
+ 186:	86 66       	ori	r24, 0x66	; 102
+ 188:	80 83       	st	Z, r24
+ 18a:	ff cf       	rjmp	.-2      	; 0x18a <main+0x26>
 
-00000146 <_exit>:
- 146:	f8 94       	cli
+0000018c <__divmodsi4>:
+ 18c:	05 2e       	mov	r0, r21
+ 18e:	97 fb       	bst	r25, 7
+ 190:	1e f4       	brtc	.+6      	; 0x198 <__divmodsi4+0xc>
+ 192:	00 94       	com	r0
+ 194:	0e 94 dd 00 	call	0x1ba	; 0x1ba <__negsi2>
+ 198:	57 fd       	sbrc	r21, 7
+ 19a:	07 d0       	rcall	.+14     	; 0x1aa <__divmodsi4_neg2>
+ 19c:	0e 94 e5 00 	call	0x1ca	; 0x1ca <__udivmodsi4>
+ 1a0:	07 fc       	sbrc	r0, 7
+ 1a2:	03 d0       	rcall	.+6      	; 0x1aa <__divmodsi4_neg2>
+ 1a4:	4e f4       	brtc	.+18     	; 0x1b8 <__divmodsi4_exit>
+ 1a6:	0c 94 dd 00 	jmp	0x1ba	; 0x1ba <__negsi2>
 
-00000148 <__stop_program>:
- 148:	ff cf       	rjmp	.-2      	; 0x148 <__stop_program>
+000001aa <__divmodsi4_neg2>:
+ 1aa:	50 95       	com	r21
+ 1ac:	40 95       	com	r20
+ 1ae:	30 95       	com	r19
+ 1b0:	21 95       	neg	r18
+ 1b2:	3f 4f       	sbci	r19, 0xFF	; 255
+ 1b4:	4f 4f       	sbci	r20, 0xFF	; 255
+ 1b6:	5f 4f       	sbci	r21, 0xFF	; 255
+
+000001b8 <__divmodsi4_exit>:
+ 1b8:	08 95       	ret
+
+000001ba <__negsi2>:
+ 1ba:	90 95       	com	r25
+ 1bc:	80 95       	com	r24
+ 1be:	70 95       	com	r23
+ 1c0:	61 95       	neg	r22
+ 1c2:	7f 4f       	sbci	r23, 0xFF	; 255
+ 1c4:	8f 4f       	sbci	r24, 0xFF	; 255
+ 1c6:	9f 4f       	sbci	r25, 0xFF	; 255
+ 1c8:	08 95       	ret
+
+000001ca <__udivmodsi4>:
+ 1ca:	a1 e2       	ldi	r26, 0x21	; 33
+ 1cc:	1a 2e       	mov	r1, r26
+ 1ce:	aa 1b       	sub	r26, r26
+ 1d0:	bb 1b       	sub	r27, r27
+ 1d2:	fd 01       	movw	r30, r26
+ 1d4:	0d c0       	rjmp	.+26     	; 0x1f0 <__udivmodsi4_ep>
+
+000001d6 <__udivmodsi4_loop>:
+ 1d6:	aa 1f       	adc	r26, r26
+ 1d8:	bb 1f       	adc	r27, r27
+ 1da:	ee 1f       	adc	r30, r30
+ 1dc:	ff 1f       	adc	r31, r31
+ 1de:	a2 17       	cp	r26, r18
+ 1e0:	b3 07       	cpc	r27, r19
+ 1e2:	e4 07       	cpc	r30, r20
+ 1e4:	f5 07       	cpc	r31, r21
+ 1e6:	20 f0       	brcs	.+8      	; 0x1f0 <__udivmodsi4_ep>
+ 1e8:	a2 1b       	sub	r26, r18
+ 1ea:	b3 0b       	sbc	r27, r19
+ 1ec:	e4 0b       	sbc	r30, r20
+ 1ee:	f5 0b       	sbc	r31, r21
+
+000001f0 <__udivmodsi4_ep>:
+ 1f0:	66 1f       	adc	r22, r22
+ 1f2:	77 1f       	adc	r23, r23
+ 1f4:	88 1f       	adc	r24, r24
+ 1f6:	99 1f       	adc	r25, r25
+ 1f8:	1a 94       	dec	r1
+ 1fa:	69 f7       	brne	.-38     	; 0x1d6 <__udivmodsi4_loop>
+ 1fc:	60 95       	com	r22
+ 1fe:	70 95       	com	r23
+ 200:	80 95       	com	r24
+ 202:	90 95       	com	r25
+ 204:	9b 01       	movw	r18, r22
+ 206:	ac 01       	movw	r20, r24
+ 208:	bd 01       	movw	r22, r26
+ 20a:	cf 01       	movw	r24, r30
+ 20c:	08 95       	ret
+
+0000020e <_exit>:
+ 20e:	f8 94       	cli
+
+00000210 <__stop_program>:
+ 210:	ff cf       	rjmp	.-2      	; 0x210 <__stop_program>

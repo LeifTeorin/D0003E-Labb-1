@@ -41,11 +41,10 @@ int main(void)
 	PORTB = (1 << PORTB7);			//Button Setting.
     /* Replace with your application code */
 	int thing = (19%10);
+	writeLong(123456789);
     while (1) 
     {
-		writeChar(thing, 0);
-		writeChar(2, 1);
-		writeChar(0, 2);
+		
     }
 }
 
@@ -88,8 +87,27 @@ void writeChar(char ch, int pos){
 }
 
 void writeLong(long i){
-	
+	long y = i;
+	int ch;
+	int cntr = 5;
+	while(y>0){
+		if(cntr<0){
+			return;
+		}
+		ch = y%10;
+		writeChar(ch, cntr);
+		y = y/10;
+		cntr--;
+	}
 	
 }
 
-
+int is_prime(long i){
+	int x = 2;
+	while(x < i){
+		if(i%x == 0){
+			return 0;
+		}
+	}
+	return 1;
+}
