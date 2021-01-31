@@ -130,12 +130,10 @@ void writeLong(long i){
 }
 
 int is_prime(long i){
-	int x = 2;
-	while(x < i){
+	for(int x; x < i; x++){
 		if(i%x == 0){
 			return 0;
 		}
-		x+=1;
 	}
 	return 1;
 }
@@ -167,6 +165,7 @@ void blink(void){
 
 void button(void)
 {
+	int lastValue = 0;
 	while(1){
 		if ((1<<PINB7) == 0 && lastValue == 0) //1<<PINB7 = Intryckt d? 0, right?
 		{
@@ -186,5 +185,54 @@ void button(void)
 		{
 			LCDDR3 = LCDDR3 | 0x66 //sl?r p?
 		}
+	}
+}
+
+void partFour(void){
+	long num = 2;
+	TCCR1B = 0x04;
+	TCNT1 = 0x0000;
+	int lastValue = 0;
+	int light = 0;
+	int time = 31250;
+	
+	while(1){
+		
+		if(is_prime(num)){
+			writeLong(num);
+		}
+		
+		if ((1<<PINB7) == 0 && lastValue == 0) //1<<PINB7 = Intryckt d? 0, right?
+		{
+			lastValue = 1;
+		}
+		if(((1 << PINB7) == 1 && lastValue == 1))
+		{
+			lastValue = 0;
+		}
+
+		//He av sk?rmen d? knappen ?r itryckt
+		if (lastValue == 1)
+		{
+			LCDDR3 = LCDDR3 & 0x99 // sl?r av
+		}
+		else
+		{
+			LCDDR3 = LCDDR3 | 0x66 //sl?r p?
+		}
+		
+		if(TCNT1 == time){
+			if(light){
+				LCDDR0 = LCDDR0 & 0x99;
+				}else{
+				LCDDR0 = LCDDR0 | 0x66;
+			}
+			light = ~light;
+			time += 31250;
+		}
+		if(TCNT1 > 62500){
+			time = 31250;
+		}
+		num += 1;
 	}
 }
