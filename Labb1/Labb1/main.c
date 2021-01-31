@@ -30,10 +30,8 @@ int characters[13] =
 	0x1641,		// E
 	0x1510		// J
 };
-/*ISR(ADC_vect)
-{
-	// user code here
-}*/
+
+int lastValue = 0;
 int main(void)
 {
 	//CLKPR = 0x80;	
@@ -50,19 +48,28 @@ int main(void)
 	//writeLong(700000);
     while (1) 
     {
-		writeLong(123456);
 		button();
     }
 }
 
 void button(void)
 {
-	BPORT = (1 << PINB7);
-	while (1)
+	if ((1<<PINB7) == 0 && lastValue == 0) //1<<PINB7 = Intryckt då 0, right?
 	{
-		while (BPORT); //Vänta på input?
+		lastValue = 1;
+	}
+	if(((1 << PINB7) == 1 && lastValue == 1))
+	{
+		lastValue = 0;
+	}
+
+	//He av skärmen då knappen är itryckt
+	if (lastValue == 1)
+	{
 		LCDDR3 = LCDDR3 & 0x99 // slår av
-		while (!BPORT); //Vänta på släpp?
+	}
+	else
+	{
 		LCDDR3 = LCDDR3 | 0x66 //slår på
 	}
 }
