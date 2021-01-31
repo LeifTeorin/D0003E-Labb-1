@@ -164,3 +164,27 @@ void blink(void){
 	}
 	
 }
+
+void button(void)
+{
+	while(1){
+		if ((1<<PINB7) == 0 && lastValue == 0) //1<<PINB7 = Intryckt d? 0, right?
+		{
+			lastValue = 1;
+		}
+		if(((1 << PINB7) == 1 && lastValue == 1))
+		{
+			lastValue = 0;
+		}
+
+		//He av sk?rmen d? knappen ?r itryckt
+		if (lastValue == 1)
+		{
+			LCDDR3 = LCDDR3 & 0x99 // sl?r av
+		}
+		else
+		{
+			LCDDR3 = LCDDR3 | 0x66 //sl?r p?
+		}
+	}
+}
