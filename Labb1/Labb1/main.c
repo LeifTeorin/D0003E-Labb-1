@@ -8,9 +8,11 @@
 #include <avr/io.h>
 #include <avr/portpins.h>
 #include <stdbool.h>
+#include <avr/interrupt.h>
 #define true	1
 #define false	0
 
+//Om PB4 så är det enter, checka input PB4 om den händer gör interrupt.
 
 int characters[13] =
 {
@@ -28,7 +30,10 @@ int characters[13] =
 	0x1641,		// E
 	0x1510		// J
 };
-
+/*ISR(ADC_vect)
+{
+	// user code here
+}*/
 int main(void)
 {
 	//CLKPR = 0x80;	
@@ -43,12 +48,25 @@ int main(void)
 	//blink();
 	//writeChar(7, 0);
 	//writeLong(700000);
-	
     while (1) 
     {
-		
+		writeLong(123456);
+		button();
     }
 }
+
+void button(void)
+{
+	BPORT = (1 << PINB7);
+	while (1)
+	{
+		while (BPORT); //Vänta på input?
+		LCDDR3 = LCDDR3 & 0x99 // slår av
+		while (!BPORT); //Vänta på släpp?
+		LCDDR3 = LCDDR3 | 0x66 //slår på
+	}
+}
+
 
 void LCD_init(void){
 	LCDCRA = 0xc0; // (1<<LCDEN);						
