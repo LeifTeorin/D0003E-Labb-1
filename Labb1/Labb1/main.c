@@ -7,6 +7,7 @@
 
 #include <avr/io.h>
 #include <avr/portpins.h>
+#include <stdint.h>
 
 
 int characters[13] =
@@ -30,7 +31,7 @@ int characters[13] =
 int main(void)
 {
 	//CLKPR = 0x80;	
-	//CLKPR =	0x00;	
+	//CLKPR = 0x00;	
 	
 	// Device Initialization values:
 	
@@ -40,8 +41,8 @@ int main(void)
     /* Replace with your application code */
 	
 	//blink();
-	//writeChar(7, 0);
-	//blink();
+	//primes(30000);
+	//button();
     while (1) 
     {
 		
@@ -125,7 +126,7 @@ void primes(long i){
 void blink(void){
 	TCCR1B = TCCR1B|0x04; // detta ändrar CS12 till 1, vilket ändrar prescaling till 256
 	int light = 0;
-	unsigned int time = 31250;
+	unsigned short time = 31250;
 	TCNT1 = 0x0000;
 	
 	while(1){
@@ -139,9 +140,6 @@ void blink(void){
 			light = ~light;
 			time += 31250;
 		}
-		if(TCNT1 > 62500){
-			time = 31250;
-		}
 		
 	}
 	
@@ -149,19 +147,19 @@ void blink(void){
 
 void button(void)
 {
-	int lastValue = 0;
+	int buttonpress = 0;
 	while(1)
 	{
-		if ((PINB>>7) == 0) //PINB7 = Intryckt då 0
+		if (!(PINB&0x80)) //PINB7 = Intryckt då 0
 		{
-			lastValue = 1;
+			buttonpress = 1;
 		}
-		if(((PINB>>7) == 1))
+		if((PINB&0x80))
 		{
-			lastValue = 0;
+			buttonpress = 0;
 		}
 
-		if (lastValue == 0)
+		if (buttonpress == 0)
 		{
 			LCDDR0 = LCDDR0 & 0x99; // slår av
 		}
@@ -178,33 +176,33 @@ void partFour(void){ //då två av funktionerna har busy-wait måste vi slå ihop ko
 	TCNT1 = 0x0000;
 	int lastValue = 0;
 	int light = 0;
-	int time = 31250;
+	unsigned short time = 31250;
 	
 	while(1){
 		
-		if(is_prime(num)){
+		if(is_prime(num)){	// vi tar primtalen först
 			writeLong(num);
 		}
 		
-		if ((PINB>>7) == 0) 
+		if (!(PINB&0x80)) // sen knappen
 		{
 			lastValue = 1;
 		}
-		if(((PINB>>7) == 1))
+		if(PINB&0x80)
 		{
 			lastValue = 0;
 		}
 
 		if (lastValue == 0)
 		{
-			LCDDR0 = LCDDR0 & 0xf9; // slår av
+			LCDDR0 = LCDDR0 & 0xf9; 
 		}
 		else
 		{
-			LCDDR0 = LCDDR0 | 0x06; //slår p?
+			LCDDR0 = LCDDR0 | 0x06; 
 		}
 		
-		if(TCNT1 >= time){
+		if(TCNT1 >= time){	// sen timern
 			if(light){
 				LCDDR0 = LCDDR0 & 0x9f; //slår av
 				}else{
@@ -213,9 +211,7 @@ void partFour(void){ //då två av funktionerna har busy-wait måste vi slå ihop ko
 			light = ~light;
 			time += 31250;
 		}
-		if(TCNT1 < 31250 && time > 62500){
-			time = 31250;
-		}
+		
 		num += 1;
 	}
 }
