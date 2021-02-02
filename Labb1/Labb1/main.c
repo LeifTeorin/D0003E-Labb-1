@@ -7,10 +7,7 @@
 
 #include <avr/io.h>
 #include <avr/portpins.h>
-#include <stdbool.h>
-#include <avr/interrupt.h>
-#define true	1
-#define false	0
+
 
 int characters[13] =
 {
@@ -29,65 +26,42 @@ int characters[13] =
 	0x1510		// J
 };
 
-int lastValue = 0;
+
 int main(void)
 {
-	CLKPR = 0x80;	
-	CLKPR =	0x00;	
+	//CLKPR = 0x80;	
+	//CLKPR =	0x00;	
 	
 	// Device Initialization values:
 	
-	LCD_init();
-	PORTB = (1<<PORTB7);
+	//LCD_init();
+	//PORTB = (1<<PORTB7);
 	
     /* Replace with your application code */
 	
 	//blink();
 	//writeChar(7, 0);
-	//writeLong(700000);
+	//blink();
     while (1) 
     {
-		button();
+		
     }
 }
 
-void button(void)
-{
-	if ((1<<PINB7) == 0 && lastValue == 0) //1<<PINB7 = Intryckt då 0, right?
-	{
-		lastValue = 1;
-	}
-	if(((1 << PINB7) == 1 && lastValue == 1))
-	{
-		lastValue = 0;
-	}
-
-	//He av skärmen då knappen är itryckt
-	if (lastValue == 1)
-	{
-		LCDDR3 = LCDDR3 & 0x99 // slår av
-	}
-	else
-	{
-		LCDDR3 = LCDDR3 | 0x66 //slår på
-	}
-}
-
-
 void LCD_init(void){
-	LCDDC0 = 0;
+	/*LCDDC0 = 0;
 	LCDDC1 = 0;
 	LCDDC2 = 0; // 300 mikrosekunder
 	LCDMUX0 = 1;
-	LCDMUX1 = 1; // 1/3 bias och 1/4 duty
-	LCDCRA = (1<<LCDEN) | (1<<LCDAB) | (1<<LCDIE); // 
-	LCDCRB = (1<<LCDCS)  | (3<<LCDMUX0) | (7<<LCDPM0); // 
-	LCDFRR = (0<<LCDPS0) | (7<<LCDCD0);	// sätter prescalern och ger framerate 32 Hz	
-	LCDCCR |= 15; // sätter kontrastkontrollen till 3,35 V							
+	LCDMUX1 = 1; */ // 1/3 bias och 1/4 duty
+	LCDCRA |= 0x80; 
+	LCDCRB = 0xb7; 
+	LCDCCR |= 15; // sätter kontrastkontrollen till 3,35 V
+	LCDFRR = 7;	// sätter prescalern och ger framerate 32 Hz								
 }
 
 void writeChar(char ch, int pos){
-	if(pos>5 | pos<0){
+	if((pos>5) | (pos<0)){
 		return;
 	}
 	int shift;
@@ -113,8 +87,6 @@ void writeChar(char ch, int pos){
 		character = (character>>4);
 		ptr += 5;
 	}
-	
-	
 }
 
 void writeLong(long i){
@@ -134,7 +106,7 @@ void writeLong(long i){
 }
 
 int is_prime(long i){
-	for(int x; x < i; x++){
+	for(int x = 2; x < i; x++){
 		if(i%x == 0){
 			return 0;
 		}
@@ -142,10 +114,10 @@ int is_prime(long i){
 	return 1;
 }
 
-void primes(void){
-	for(int i = 2; i <27001; i++){
-		if(is_prime(i)){
-			writeLong(i);
+void primes(long i){
+	for(int x = 2; x < i; x++){
+		if(is_prime(x)){
+			writeLong(x);
 		}
 	}
 }
@@ -162,7 +134,7 @@ void blink(void){
 			if(light){
 				LCDDR0 = LCDDR0 & 0x99;
 			}else{
-				LCDDR0 = LCDDR0 | 0x66;
+				LCDDR0 = LCDDR0 | 0x60;
 			}
 			light = ~light;
 			time += 31250;
@@ -178,23 +150,24 @@ void blink(void){
 void button(void)
 {
 	int lastValue = 0;
-	while(1){
-		if ((PINB7) == 1 && lastValue == 0) //PINB7 = Intryckt då 1
+	while(1)
+	{
+		if ((PINB>>7) == 0) //PINB7 = Intryckt då 0
 		{
 			lastValue = 1;
 		}
-		if(((PINB7) == 0 && lastValue == 1))
+		if(((PINB>>7) == 1))
 		{
 			lastValue = 0;
 		}
 
-		if (lastValue == 1)
+		if (lastValue == 0)
 		{
-			LCDDR3 = LCDDR3 & 0x99 // slår av
+			LCDDR0 = LCDDR0 & 0x99; // slår av
 		}
 		else
 		{
-			LCDDR3 = LCDDR3 | 0x66 //slår på
+			LCDDR0 = LCDDR0 | 0x06; //slår på
 		}
 	}
 }
@@ -213,30 +186,29 @@ void partFour(void){ //då två av funktionerna har busy-wait måste vi slå ihop ko
 			writeLong(num);
 		}
 		
-		if ((PINB7) == 1 && lastValue == 0) //1<<PINB7 = Intryckt d? 0, right?
+		if ((PINB>>7) == 0) 
 		{
 			lastValue = 1;
 		}
-		if(((PINB7) == 0 && lastValue == 1))
+		if(((PINB>>7) == 1))
 		{
 			lastValue = 0;
 		}
 
-		//He av sk?rmen d? knappen ?r itryckt
-		if (lastValue == 1)
+		if (lastValue == 0)
 		{
-			LCDDR3 = LCDDR3 & 0x99 // sl?r av
+			LCDDR0 = LCDDR0 & 0xf9; // slår av
 		}
 		else
 		{
-			LCDDR3 = LCDDR3 | 0x66 //sl?r p?
+			LCDDR0 = LCDDR0 | 0x06; //slår p?
 		}
 		
 		if(TCNT1 >= time){
 			if(light){
-				LCDDR0 = LCDDR0 & 0x99;
+				LCDDR0 = LCDDR0 & 0x9f; //slår av
 				}else{
-				LCDDR0 = LCDDR0 | 0x66;
+				LCDDR0 = LCDDR0 | 0x60; // slår på
 			}
 			light = ~light;
 			time += 31250;
