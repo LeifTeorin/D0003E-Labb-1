@@ -3,29 +3,29 @@ Labb1.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000000e4  2**0
+  0 .data         0000001a  00800100  000002c6  0000033a  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         00000090  00000000  00000000  00000054  2**1
+  1 .text         000002c6  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  000000e4  2**0
+  2 .comment      00000030  00000000  00000000  00000354  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000114  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000384  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000060  00000000  00000000  00000154  2**0
+  4 .debug_aranges 00000060  00000000  00000000  000003c4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000b48  00000000  00000000  000001b4  2**0
+  5 .debug_info   00000b92  00000000  00000000  00000424  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000008c0  00000000  00000000  00000cfc  2**0
+  6 .debug_abbrev 000008e5  00000000  00000000  00000fb6  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000452  00000000  00000000  000015bc  2**0
+  7 .debug_line   000004d1  00000000  00000000  0000189b  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000118  00000000  00000000  00001a10  2**2
+  8 .debug_frame  00000118  00000000  00000000  00001d6c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000491  00000000  00000000  00001b28  2**0
+  9 .debug_str    0000049d  00000000  00000000  00001e84  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    000004d1  00000000  00000000  00001fb9  2**0
+ 10 .debug_loc    00000527  00000000  00000000  00002321  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000068  00000000  00000000  0000248a  2**0
+ 11 .debug_ranges 00000068  00000000  00000000  00002848  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -67,31 +67,456 @@ Disassembly of section .text:
   68:	11 e0       	ldi	r17, 0x01	; 1
   6a:	a0 e0       	ldi	r26, 0x00	; 0
   6c:	b1 e0       	ldi	r27, 0x01	; 1
-  6e:	e0 e9       	ldi	r30, 0x90	; 144
-  70:	f0 e0       	ldi	r31, 0x00	; 0
+  6e:	e6 ec       	ldi	r30, 0xC6	; 198
+  70:	f2 e0       	ldi	r31, 0x02	; 2
   72:	02 c0       	rjmp	.+4      	; 0x78 <__do_copy_data+0x10>
   74:	05 90       	lpm	r0, Z+
   76:	0d 92       	st	X+, r0
-  78:	a0 30       	cpi	r26, 0x00	; 0
+  78:	aa 31       	cpi	r26, 0x1A	; 26
   7a:	b1 07       	cpc	r27, r17
   7c:	d9 f7       	brne	.-10     	; 0x74 <__do_copy_data+0xc>
-  7e:	0e 94 45 00 	call	0x8a	; 0x8a <main>
-  82:	0c 94 46 00 	jmp	0x8c	; 0x8c <_exit>
+  7e:	0e 94 14 01 	call	0x228	; 0x228 <main>
+  82:	0c 94 61 01 	jmp	0x2c2	; 0x2c2 <_exit>
 
 00000086 <__bad_interrupt>:
   86:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
-0000008a <main>:
-	0x1510		// J
+0000008a <LCD_init>:
+		
+    }
+}
+
+void LCD_init(void){
+	LCDCRA |= 0x80; // LCD enable
+  8a:	e4 ee       	ldi	r30, 0xE4	; 228
+  8c:	f0 e0       	ldi	r31, 0x00	; 0
+  8e:	80 81       	ld	r24, Z
+  90:	80 68       	ori	r24, 0x80	; 128
+  92:	80 83       	st	Z, r24
+	LCDCRB = 0xb7; // 1/3 bias och 1/4 duty, asynk-klockan används och 25 segment används
+  94:	87 eb       	ldi	r24, 0xB7	; 183
+  96:	80 93 e5 00 	sts	0x00E5, r24	; 0x8000e5 <__TEXT_REGION_LENGTH__+0x7fc0e5>
+	LCDCCR |= 15; // sätter kontrastkontrollen till 3,35 V
+  9a:	e7 ee       	ldi	r30, 0xE7	; 231
+  9c:	f0 e0       	ldi	r31, 0x00	; 0
+  9e:	80 81       	ld	r24, Z
+  a0:	8f 60       	ori	r24, 0x0F	; 15
+  a2:	80 83       	st	Z, r24
+	LCDFRR = 7;	// sätter prescalern och ger framerate 32 Hz								
+  a4:	87 e0       	ldi	r24, 0x07	; 7
+  a6:	80 93 e6 00 	sts	0x00E6, r24	; 0x8000e6 <__TEXT_REGION_LENGTH__+0x7fc0e6>
+  aa:	08 95       	ret
+
+000000ac <writeChar>:
+}
+
+void writeChar(char ch, int pos){
+	if((pos>5) | (pos<0)){
+  ac:	66 30       	cpi	r22, 0x06	; 6
+  ae:	71 05       	cpc	r23, r1
+  b0:	b8 f5       	brcc	.+110    	; 0x120 <writeChar+0x74>
+	char currbyte = 0x00;
+	int character = 0;
+	char *ptr;
+	ptr  = &LCDDR0; // pekaren börjar på lcddr0
+	
+	if((int)ch > -1 && (int)ch < 10){
+  b2:	8a 30       	cpi	r24, 0x0A	; 10
+  b4:	48 f4       	brcc	.+18     	; 0xc8 <writeChar+0x1c>
+		character = characters[(int)ch];
+  b6:	e8 2f       	mov	r30, r24
+  b8:	f0 e0       	ldi	r31, 0x00	; 0
+  ba:	ee 0f       	add	r30, r30
+  bc:	ff 1f       	adc	r31, r31
+  be:	e0 50       	subi	r30, 0x00	; 0
+  c0:	ff 4f       	sbci	r31, 0xFF	; 255
+  c2:	40 81       	ld	r20, Z
+  c4:	51 81       	ldd	r21, Z+1	; 0x01
+  c6:	02 c0       	rjmp	.+4      	; 0xcc <writeChar+0x20>
+		return;
+	}
+	int shift;
+	char mask_reg;
+	char currbyte = 0x00;
+	int character = 0;
+  c8:	40 e0       	ldi	r20, 0x00	; 0
+  ca:	50 e0       	ldi	r21, 0x00	; 0
+	if((int)ch > -1 && (int)ch < 10){
+		character = characters[(int)ch];
+	}
+	
+	
+	if(pos & 0x01){ // om pos är udda finns det en etta på slutet, då ska den skrivas på de fyra bitarna till vänster på registren
+  cc:	60 ff       	sbrs	r22, 0
+  ce:	03 c0       	rjmp	.+6      	; 0xd6 <writeChar+0x2a>
+		mask_reg = 0x0f;
+  d0:	af e0       	ldi	r26, 0x0F	; 15
+		shift = 4; // bitarna som ska skrivas behöver även flyttas för att skrivas på vänster sida
+  d2:	b4 e0       	ldi	r27, 0x04	; 4
+  d4:	02 c0       	rjmp	.+4      	; 0xda <writeChar+0x2e>
+	}else{
+		mask_reg = 0xf0;
+  d6:	a0 ef       	ldi	r26, 0xF0	; 240
+		shift = 0;
+  d8:	b0 e0       	ldi	r27, 0x00	; 0
+	}
+	ptr = ptr + (pos>>1); // pekaren hamnar på lcddr0, 1 eller 2 beroende på pos
+  da:	75 95       	asr	r23
+  dc:	67 95       	ror	r22
+  de:	fb 01       	movw	r30, r22
+  e0:	e4 51       	subi	r30, 0x14	; 20
+  e2:	ff 4f       	sbci	r31, 0xFF	; 255
+	
+	for(int i = 0; i < 4; i++){
+  e4:	20 e0       	ldi	r18, 0x00	; 0
+  e6:	30 e0       	ldi	r19, 0x00	; 0
+  e8:	18 c0       	rjmp	.+48     	; 0x11a <writeChar+0x6e>
+		currbyte = (character & 0x0f); // vi tar de 4 bittarna längst till höger
+  ea:	84 2f       	mov	r24, r20
+  ec:	8f 70       	andi	r24, 0x0F	; 15
+		currbyte = currbyte << shift; // bittarna shiftas antingen 0 eller 4 steg åt vänster
+  ee:	90 e0       	ldi	r25, 0x00	; 0
+  f0:	0b 2e       	mov	r0, r27
+  f2:	02 c0       	rjmp	.+4      	; 0xf8 <writeChar+0x4c>
+  f4:	88 0f       	add	r24, r24
+  f6:	99 1f       	adc	r25, r25
+  f8:	0a 94       	dec	r0
+  fa:	e2 f7       	brpl	.-8      	; 0xf4 <writeChar+0x48>
+		*ptr = ((*ptr & mask_reg)|currbyte); // registret maskas och fylls sedan in med de bittarna vi hämtat
+  fc:	90 81       	ld	r25, Z
+  fe:	9a 23       	and	r25, r26
+ 100:	89 2b       	or	r24, r25
+ 102:	80 83       	st	Z, r24
+		character = (character>>4); // vi tar bort de 4 bittarna till höger
+ 104:	55 95       	asr	r21
+ 106:	47 95       	ror	r20
+ 108:	55 95       	asr	r21
+ 10a:	47 95       	ror	r20
+ 10c:	55 95       	asr	r21
+ 10e:	47 95       	ror	r20
+ 110:	55 95       	asr	r21
+ 112:	47 95       	ror	r20
+		ptr += 5; // pekaren går fem register fram för nästa 4 bittar
+ 114:	35 96       	adiw	r30, 0x05	; 5
+		mask_reg = 0xf0;
+		shift = 0;
+	}
+	ptr = ptr + (pos>>1); // pekaren hamnar på lcddr0, 1 eller 2 beroende på pos
+	
+	for(int i = 0; i < 4; i++){
+ 116:	2f 5f       	subi	r18, 0xFF	; 255
+ 118:	3f 4f       	sbci	r19, 0xFF	; 255
+ 11a:	24 30       	cpi	r18, 0x04	; 4
+ 11c:	31 05       	cpc	r19, r1
+ 11e:	2c f3       	brlt	.-54     	; 0xea <writeChar+0x3e>
+ 120:	08 95       	ret
+
+00000122 <writeLong>:
+		character = (character>>4); // vi tar bort de 4 bittarna till höger
+		ptr += 5; // pekaren går fem register fram för nästa 4 bittar
+	}
+}
+
+void writeLong(long i){
+ 122:	ef 92       	push	r14
+ 124:	ff 92       	push	r15
+ 126:	0f 93       	push	r16
+ 128:	1f 93       	push	r17
+ 12a:	cf 93       	push	r28
+ 12c:	df 93       	push	r29
+	long y = i;
+	char ch;
+	int cntr = 5;
+ 12e:	c5 e0       	ldi	r28, 0x05	; 5
+ 130:	d0 e0       	ldi	r29, 0x00	; 0
+	while(y>0){ // så länge talet är störrer än noll eller om vi inte skrivit 6 siffror ska en siffra skrivas
+ 132:	15 c0       	rjmp	.+42     	; 0x15e <writeLong+0x3c>
+		if(cntr<0){
+ 134:	dd 23       	and	r29, r29
+ 136:	c4 f0       	brlt	.+48     	; 0x168 <writeLong+0x46>
+			return;
+		}
+		ch = y%10; // modulo 10 för att få ut siffran till höger
+ 138:	2a e0       	ldi	r18, 0x0A	; 10
+ 13a:	30 e0       	ldi	r19, 0x00	; 0
+ 13c:	40 e0       	ldi	r20, 0x00	; 0
+ 13e:	50 e0       	ldi	r21, 0x00	; 0
+ 140:	0e 94 20 01 	call	0x240	; 0x240 <__divmodsi4>
+ 144:	e2 2e       	mov	r14, r18
+ 146:	f3 2e       	mov	r15, r19
+ 148:	04 2f       	mov	r16, r20
+ 14a:	15 2f       	mov	r17, r21
+ 14c:	86 2f       	mov	r24, r22
+		writeChar(ch, cntr); // skriv siffran till höger
+ 14e:	be 01       	movw	r22, r28
+ 150:	0e 94 56 00 	call	0xac	; 0xac <writeChar>
+		y = y/10; // vi tar bort siffran längst till höger
+ 154:	6e 2d       	mov	r22, r14
+ 156:	7f 2d       	mov	r23, r15
+ 158:	80 2f       	mov	r24, r16
+ 15a:	91 2f       	mov	r25, r17
+		cntr--; // vi börjar till höger och går sedan åt vänster därifrån
+ 15c:	21 97       	sbiw	r28, 0x01	; 1
+
+void writeLong(long i){
+	long y = i;
+	char ch;
+	int cntr = 5;
+	while(y>0){ // så länge talet är störrer än noll eller om vi inte skrivit 6 siffror ska en siffra skrivas
+ 15e:	16 16       	cp	r1, r22
+ 160:	17 06       	cpc	r1, r23
+ 162:	18 06       	cpc	r1, r24
+ 164:	19 06       	cpc	r1, r25
+ 166:	34 f3       	brlt	.-52     	; 0x134 <writeLong+0x12>
+		writeChar(ch, cntr); // skriv siffran till höger
+		y = y/10; // vi tar bort siffran längst till höger
+		cntr--; // vi börjar till höger och går sedan åt vänster därifrån
+	}
+	
+}
+ 168:	df 91       	pop	r29
+ 16a:	cf 91       	pop	r28
+ 16c:	1f 91       	pop	r17
+ 16e:	0f 91       	pop	r16
+ 170:	ff 90       	pop	r15
+ 172:	ef 90       	pop	r14
+ 174:	08 95       	ret
+
+00000176 <is_prime>:
+
+int is_prime(long i){
+ 176:	cf 92       	push	r12
+ 178:	df 92       	push	r13
+ 17a:	ef 92       	push	r14
+ 17c:	ff 92       	push	r15
+ 17e:	cf 93       	push	r28
+ 180:	df 93       	push	r29
+ 182:	6b 01       	movw	r12, r22
+ 184:	7c 01       	movw	r14, r24
+	for(int x = 2; x < i; x++){
+ 186:	c2 e0       	ldi	r28, 0x02	; 2
+ 188:	d0 e0       	ldi	r29, 0x00	; 0
+ 18a:	09 c0       	rjmp	.+18     	; 0x19e <is_prime+0x28>
+		if(i%x == 0){
+ 18c:	c7 01       	movw	r24, r14
+ 18e:	b6 01       	movw	r22, r12
+ 190:	0e 94 20 01 	call	0x240	; 0x240 <__divmodsi4>
+ 194:	67 2b       	or	r22, r23
+ 196:	68 2b       	or	r22, r24
+ 198:	69 2b       	or	r22, r25
+ 19a:	71 f0       	breq	.+28     	; 0x1b8 <is_prime+0x42>
+	}
+	
+}
+
+int is_prime(long i){
+	for(int x = 2; x < i; x++){
+ 19c:	21 96       	adiw	r28, 0x01	; 1
+ 19e:	9e 01       	movw	r18, r28
+ 1a0:	0d 2e       	mov	r0, r29
+ 1a2:	00 0c       	add	r0, r0
+ 1a4:	44 0b       	sbc	r20, r20
+ 1a6:	55 0b       	sbc	r21, r21
+ 1a8:	2c 15       	cp	r18, r12
+ 1aa:	3d 05       	cpc	r19, r13
+ 1ac:	4e 05       	cpc	r20, r14
+ 1ae:	5f 05       	cpc	r21, r15
+ 1b0:	6c f3       	brlt	.-38     	; 0x18c <is_prime+0x16>
+		if(i%x == 0){
+			return 0;
+		}
+	}
+	return 1;
+ 1b2:	81 e0       	ldi	r24, 0x01	; 1
+ 1b4:	90 e0       	ldi	r25, 0x00	; 0
+ 1b6:	02 c0       	rjmp	.+4      	; 0x1bc <is_prime+0x46>
+}
+
+int is_prime(long i){
+	for(int x = 2; x < i; x++){
+		if(i%x == 0){
+			return 0;
+ 1b8:	80 e0       	ldi	r24, 0x00	; 0
+ 1ba:	90 e0       	ldi	r25, 0x00	; 0
+		}
+	}
+	return 1;
+}
+ 1bc:	df 91       	pop	r29
+ 1be:	cf 91       	pop	r28
+ 1c0:	ff 90       	pop	r15
+ 1c2:	ef 90       	pop	r14
+ 1c4:	df 90       	pop	r13
+ 1c6:	cf 90       	pop	r12
+ 1c8:	08 95       	ret
+
+000001ca <primes>:
+
+void primes(long i){
+ 1ca:	8f 92       	push	r8
+ 1cc:	9f 92       	push	r9
+ 1ce:	af 92       	push	r10
+ 1d0:	bf 92       	push	r11
+ 1d2:	cf 92       	push	r12
+ 1d4:	df 92       	push	r13
+ 1d6:	ef 92       	push	r14
+ 1d8:	ff 92       	push	r15
+ 1da:	cf 93       	push	r28
+ 1dc:	df 93       	push	r29
+ 1de:	4b 01       	movw	r8, r22
+ 1e0:	5c 01       	movw	r10, r24
+	for(int x = 2; x < i; x++){
+ 1e2:	c2 e0       	ldi	r28, 0x02	; 2
+ 1e4:	d0 e0       	ldi	r29, 0x00	; 0
+ 1e6:	0b c0       	rjmp	.+22     	; 0x1fe <primes+0x34>
+		if(is_prime(x)){
+ 1e8:	c7 01       	movw	r24, r14
+ 1ea:	b6 01       	movw	r22, r12
+ 1ec:	0e 94 bb 00 	call	0x176	; 0x176 <is_prime>
+ 1f0:	89 2b       	or	r24, r25
+ 1f2:	21 f0       	breq	.+8      	; 0x1fc <primes+0x32>
+			writeLong(x);
+ 1f4:	c7 01       	movw	r24, r14
+ 1f6:	b6 01       	movw	r22, r12
+ 1f8:	0e 94 91 00 	call	0x122	; 0x122 <writeLong>
+	}
+	return 1;
+}
+
+void primes(long i){
+	for(int x = 2; x < i; x++){
+ 1fc:	21 96       	adiw	r28, 0x01	; 1
+ 1fe:	6e 01       	movw	r12, r28
+ 200:	0d 2e       	mov	r0, r29
+ 202:	00 0c       	add	r0, r0
+ 204:	ee 08       	sbc	r14, r14
+ 206:	ff 08       	sbc	r15, r15
+ 208:	c8 14       	cp	r12, r8
+ 20a:	d9 04       	cpc	r13, r9
+ 20c:	ea 04       	cpc	r14, r10
+ 20e:	fb 04       	cpc	r15, r11
+ 210:	5c f3       	brlt	.-42     	; 0x1e8 <primes+0x1e>
+		if(is_prime(x)){
+			writeLong(x);
+		}
+	}
+}
+ 212:	df 91       	pop	r29
+ 214:	cf 91       	pop	r28
+ 216:	ff 90       	pop	r15
+ 218:	ef 90       	pop	r14
+ 21a:	df 90       	pop	r13
+ 21c:	cf 90       	pop	r12
+ 21e:	bf 90       	pop	r11
+ 220:	af 90       	pop	r10
+ 222:	9f 90       	pop	r9
+ 224:	8f 90       	pop	r8
+ 226:	08 95       	ret
+
+00000228 <main>:
 };
 
 
 int main(void)
 {
-  8a:	ff cf       	rjmp	.-2      	; 0x8a <main>
+	CLKPR = 0x80;	
+ 228:	e1 e6       	ldi	r30, 0x61	; 97
+ 22a:	f0 e0       	ldi	r31, 0x00	; 0
+ 22c:	80 e8       	ldi	r24, 0x80	; 128
+ 22e:	80 83       	st	Z, r24
+	CLKPR = 0x00;	
+ 230:	10 82       	st	Z, r1
+	
+	LCD_init();
+ 232:	0e 94 45 00 	call	0x8a	; 0x8a <LCD_init>
+	//PORTB = (1<<PORTB7);
+	
+    /* Replace with your application code */
 
-0000008c <_exit>:
-  8c:	f8 94       	cli
+	primes(30000);
+ 236:	80 e3       	ldi	r24, 0x30	; 48
+ 238:	95 e7       	ldi	r25, 0x75	; 117
+ 23a:	0e 94 e5 00 	call	0x1ca	; 0x1ca <primes>
+ 23e:	ff cf       	rjmp	.-2      	; 0x23e <main+0x16>
 
-0000008e <__stop_program>:
-  8e:	ff cf       	rjmp	.-2      	; 0x8e <__stop_program>
+00000240 <__divmodsi4>:
+ 240:	05 2e       	mov	r0, r21
+ 242:	97 fb       	bst	r25, 7
+ 244:	1e f4       	brtc	.+6      	; 0x24c <__divmodsi4+0xc>
+ 246:	00 94       	com	r0
+ 248:	0e 94 37 01 	call	0x26e	; 0x26e <__negsi2>
+ 24c:	57 fd       	sbrc	r21, 7
+ 24e:	07 d0       	rcall	.+14     	; 0x25e <__divmodsi4_neg2>
+ 250:	0e 94 3f 01 	call	0x27e	; 0x27e <__udivmodsi4>
+ 254:	07 fc       	sbrc	r0, 7
+ 256:	03 d0       	rcall	.+6      	; 0x25e <__divmodsi4_neg2>
+ 258:	4e f4       	brtc	.+18     	; 0x26c <__divmodsi4_exit>
+ 25a:	0c 94 37 01 	jmp	0x26e	; 0x26e <__negsi2>
+
+0000025e <__divmodsi4_neg2>:
+ 25e:	50 95       	com	r21
+ 260:	40 95       	com	r20
+ 262:	30 95       	com	r19
+ 264:	21 95       	neg	r18
+ 266:	3f 4f       	sbci	r19, 0xFF	; 255
+ 268:	4f 4f       	sbci	r20, 0xFF	; 255
+ 26a:	5f 4f       	sbci	r21, 0xFF	; 255
+
+0000026c <__divmodsi4_exit>:
+ 26c:	08 95       	ret
+
+0000026e <__negsi2>:
+ 26e:	90 95       	com	r25
+ 270:	80 95       	com	r24
+ 272:	70 95       	com	r23
+ 274:	61 95       	neg	r22
+ 276:	7f 4f       	sbci	r23, 0xFF	; 255
+ 278:	8f 4f       	sbci	r24, 0xFF	; 255
+ 27a:	9f 4f       	sbci	r25, 0xFF	; 255
+ 27c:	08 95       	ret
+
+0000027e <__udivmodsi4>:
+ 27e:	a1 e2       	ldi	r26, 0x21	; 33
+ 280:	1a 2e       	mov	r1, r26
+ 282:	aa 1b       	sub	r26, r26
+ 284:	bb 1b       	sub	r27, r27
+ 286:	fd 01       	movw	r30, r26
+ 288:	0d c0       	rjmp	.+26     	; 0x2a4 <__udivmodsi4_ep>
+
+0000028a <__udivmodsi4_loop>:
+ 28a:	aa 1f       	adc	r26, r26
+ 28c:	bb 1f       	adc	r27, r27
+ 28e:	ee 1f       	adc	r30, r30
+ 290:	ff 1f       	adc	r31, r31
+ 292:	a2 17       	cp	r26, r18
+ 294:	b3 07       	cpc	r27, r19
+ 296:	e4 07       	cpc	r30, r20
+ 298:	f5 07       	cpc	r31, r21
+ 29a:	20 f0       	brcs	.+8      	; 0x2a4 <__udivmodsi4_ep>
+ 29c:	a2 1b       	sub	r26, r18
+ 29e:	b3 0b       	sbc	r27, r19
+ 2a0:	e4 0b       	sbc	r30, r20
+ 2a2:	f5 0b       	sbc	r31, r21
+
+000002a4 <__udivmodsi4_ep>:
+ 2a4:	66 1f       	adc	r22, r22
+ 2a6:	77 1f       	adc	r23, r23
+ 2a8:	88 1f       	adc	r24, r24
+ 2aa:	99 1f       	adc	r25, r25
+ 2ac:	1a 94       	dec	r1
+ 2ae:	69 f7       	brne	.-38     	; 0x28a <__udivmodsi4_loop>
+ 2b0:	60 95       	com	r22
+ 2b2:	70 95       	com	r23
+ 2b4:	80 95       	com	r24
+ 2b6:	90 95       	com	r25
+ 2b8:	9b 01       	movw	r18, r22
+ 2ba:	ac 01       	movw	r20, r24
+ 2bc:	bd 01       	movw	r22, r26
+ 2be:	cf 01       	movw	r24, r30
+ 2c0:	08 95       	ret
+
+000002c2 <_exit>:
+ 2c2:	f8 94       	cli
+
+000002c4 <__stop_program>:
+ 2c4:	ff cf       	rjmp	.-2      	; 0x2c4 <__stop_program>

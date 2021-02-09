@@ -30,19 +30,18 @@ int characters[13] =
 
 int main(void)
 {
-	//CLKPR = 0x80;	
-	//CLKPR = 0x00;	
+	CLKPR = 0x80;	
+	CLKPR = 0x00;	
 	
-	// Device Initialization values:
-	
-	//LCD_init();
+	LCD_init();
 	//PORTB = (1<<PORTB7);
 	
     /* Replace with your application code */
-	
-	//blink();
-	//primes(30000);
+
+	primes(30000);
 	//button();
+	//blink();
+	//partFour();
     while (1) 
     {
 		
@@ -50,13 +49,8 @@ int main(void)
 }
 
 void LCD_init(void){
-	/*LCDDC0 = 0;
-	LCDDC1 = 0;
-	LCDDC2 = 0; // 300 mikrosekunder
-	LCDMUX0 = 1;
-	LCDMUX1 = 1; */ // 1/3 bias och 1/4 duty
-	LCDCRA |= 0x80; 
-	LCDCRB = 0xb7; 
+	LCDCRA |= 0x80; // LCD enable
+	LCDCRB = 0xb7; // 1/3 bias och 1/4 duty, asynk-klockan används och 25 segment används
 	LCDCCR |= 15; // sätter kontrastkontrollen till 3,35 V
 	LCDFRR = 7;	// sätter prescalern och ger framerate 32 Hz								
 }
@@ -67,26 +61,31 @@ void writeChar(char ch, int pos){
 	}
 	int shift;
 	char mask_reg;
-	int character = characters[(int)ch];
 	char currbyte = 0x00;
+	int character = 0;
 	char *ptr;
-	ptr  = &LCDDR0;
+	ptr  = &LCDDR0; // pekaren börjar på lcddr0
 	
-	if(pos & 0x01){
+	if((int)ch > -1 && (int)ch < 10){
+		character = characters[(int)ch];
+	}
+	
+	
+	if(pos & 0x01){ // om pos är udda finns det en etta på slutet, då ska den skrivas på de fyra bitarna till vänster på registren
 		mask_reg = 0x0f;
-		shift = 4;
+		shift = 4; // bitarna som ska skrivas behöver även flyttas för att skrivas på vänster sida
 	}else{
 		mask_reg = 0xf0;
 		shift = 0;
 	}
-	ptr = ptr + (pos>>1);
+	ptr = ptr + (pos>>1); // pekaren hamnar på lcddr0, 1 eller 2 beroende på pos
 	
 	for(int i = 0; i < 4; i++){
-		currbyte = (character & 0x0f);
-		currbyte = currbyte << shift;
-		*ptr = ((*ptr & mask_reg)|currbyte);
-		character = (character>>4);
-		ptr += 5;
+		currbyte = (character & 0x0f); // vi tar de 4 bittarna längst till höger
+		currbyte = currbyte << shift; // bittarna shiftas antingen 0 eller 4 steg åt vänster
+		*ptr = ((*ptr & mask_reg)|currbyte); // registret maskas och fylls sedan in med de bittarna vi hämtat
+		character = (character>>4); // vi tar bort de 4 bittarna till höger
+		ptr += 5; // pekaren går fem register fram för nästa 4 bittar
 	}
 }
 
@@ -94,14 +93,14 @@ void writeLong(long i){
 	long y = i;
 	char ch;
 	int cntr = 5;
-	while(y>0){
+	while(y>0){ // så länge talet är störrer än noll eller om vi inte skrivit 6 siffror ska en siffra skrivas
 		if(cntr<0){
 			return;
 		}
-		ch = y%10;
-		writeChar(ch, cntr);
-		y = y/10;
-		cntr--;
+		ch = y%10; // modulo 10 för att få ut siffran till höger
+		writeChar(ch, cntr); // skriv siffran till höger
+		y = y/10; // vi tar bort siffran längst till höger
+		cntr--; // vi börjar till höger och går sedan åt vänster därifrån
 	}
 	
 }
@@ -125,20 +124,21 @@ void primes(long i){
 
 void blink(void){
 	TCCR1B = TCCR1B|0x04; // detta ändrar CS12 till 1, vilket ändrar prescaling till 256
-	int light = 0;
-	unsigned short time = 31250;
-	TCNT1 = 0x0000;
+	int light = 0; // light bestämmer om lampan är av eller på
+	unsigned short time = 15625; // 8000000/256 = 31250, för en sekund, alltså 15625 för en blinkning
+	// short är 2 byte, precis som timern, alltså kommer den att börja om på noll lika fort som timerregistret
+	//TCNT1 = 0x0000;
 	
 	while(1){
 		
 		if(TCNT1 == time){
 			if(light){
-				LCDDR0 = LCDDR0 & 0x99;
+				LCDDR0 = LCDDR0 & 0x99; // om den är på slår vi av den
 			}else{
-				LCDDR0 = LCDDR0 | 0x60;
+				LCDDR0 = LCDDR0 | 0x60; // annars slår vi på den
 			}
-			light = ~light;
-			time += 31250;
+			light = ~light; // vi ändrar light för att indikera att lampan är av/på
+			time += 15625;
 		}
 		
 	}
@@ -148,35 +148,41 @@ void blink(void){
 void button(void)
 {
 	int buttonpress = 0;
+	LCDDR0 |= 0x06;
 	while(1)
 	{
-		if (!(PINB&0x80)) //PINB7 = Intryckt då 0
-		{
+		if (!(PINB&0x80) && buttonpress == 0) // PINB7 = 0, när den är intryckt
+		{									  // vi byter läge endast då knappen är nedtryckt och den nyss inte var det
 			buttonpress = 1;
+			if ((LCDDR0&0x06)) // vi ser om det ena läget är på
+			{
+				LCDDR0 = LCDDR0 & 0xf9; // slår av
+				LCDDR1 = LCDDR1 | 0x60; // slår på
+			}
+			else // annars är det ju det andra läget
+			{
+				LCDDR0 = LCDDR0 | 0x06; // slår på
+				LCDDR1 = LCDDR1 & 0x9f; // slår av
+			}
 		}
-		if((PINB&0x80))
+		if((PINB&0x80) && buttonpress == 1) // om den inte är nedtryckt blir buttonpress noll
 		{
 			buttonpress = 0;
 		}
 
-		if (buttonpress == 0)
-		{
-			LCDDR0 = LCDDR0 & 0x99; // slår av
-		}
-		else
-		{
-			LCDDR0 = LCDDR0 | 0x06; //slår på
-		}
+		
+		
 	}
 }
 
 void partFour(void){ //då två av funktionerna har busy-wait måste vi slå ihop koden från de två i en while-loop
-	long num = 2;
+	long num = 25000;
 	TCCR1B = 0x04;
-	TCNT1 = 0x0000;
-	int lastValue = 0;
+//	TCNT1 = 0x0000;
+	int buttonpress = 0;
 	int light = 0;
-	unsigned short time = 31250;
+	unsigned short time = 15625;
+	LCDDR0 |= 0x06;
 	
 	while(1){
 		
@@ -184,22 +190,23 @@ void partFour(void){ //då två av funktionerna har busy-wait måste vi slå ihop ko
 			writeLong(num);
 		}
 		
-		if (!(PINB&0x80)) // sen knappen
+		if (!(PINB&0x80) && buttonpress == 0) 
 		{
-			lastValue = 1;
+			if ((LCDDR0&0x06))
+			{
+				LCDDR0 = LCDDR0 & 0xf9; 
+				LCDDR3 = 1;
+			}
+			else
+			{
+				LCDDR0 = LCDDR0 | 0x06; 
+				LCDDR3 = 0;
+			}
+			buttonpress = 1;
 		}
-		if(PINB&0x80)
+		if((PINB&0x80)) 
 		{
-			lastValue = 0;
-		}
-
-		if (lastValue == 0)
-		{
-			LCDDR0 = LCDDR0 & 0xf9; 
-		}
-		else
-		{
-			LCDDR0 = LCDDR0 | 0x06; 
+			buttonpress = 0;
 		}
 		
 		if(TCNT1 >= time){	// sen timern
@@ -209,7 +216,7 @@ void partFour(void){ //då två av funktionerna har busy-wait måste vi slå ihop ko
 				LCDDR0 = LCDDR0 | 0x60; // slår på
 			}
 			light = ~light;
-			time += 31250;
+			time += 15625;
 		}
 		
 		num += 1;
